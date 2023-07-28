@@ -1,239 +1,176 @@
-const crypto = require('crypto');
-const { promisify } = require('util');
-const jwt = require('jsonwebtoken');
+const router = require('express').Router();
 const User = require('../models/userModel');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const Email = require('../utils/email');
+const CryptoJS = require('crypto-js');
+const jwt = require('jsonwebtoken');
+const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
+const {
+  transporter,
+  sendConfirmationEmail,
+  sendPassResetEmail,
+} = require('../services/mailer');
 
-function signToken(id) {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  });
-}
+//register user
+const registerUser = async (req, res) => {
+  const { userName, email, password, userRole } = req.body;
 
-function createSendToken(user, statusCode, req, res) {
-  const token = signToken(user.id);
+  const uniqueToken = uuidv4();
 
-  res.cookie('jwt', token, {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
-  });
-
-  user.password = undefined;
-
-  res.status(statusCode).json({
-    status: 'success',
-    token,
-    data: {
-      user
-    }
-  });
-}
-
-async function signup(req, res, next) {
-  const { name, email, password, passwordConfirm, role } = req.body;
-
-  const user = await User.create({
-    name,
+  const newUser = new User({
+    userName,
     email,
-    password,
-    passwordConfirm,
-    role
+    password: CryptoJS.AES.encrypt(
+      req.body.password,
+      process.env.PASS_SECRET,
+    ).toString(),
+    verificationToken: uniqueToken,
   });
-
-  const url = `${req.protocol}://${req.get('host')}/me`;
-  await new Email(user, url).sendWelcome();
-
-  createSendToken(user, 201, req, res);
-}
-
-async function login(req, res, next) {
-  const { email, password } = req.body;
-
-  if (!email) return next(new AppError(400, 'Please provide an email'));
-  if (!password) return next(new AppError(400, 'Please provide a password'));
-
-  const user = await User.findOne({ email }).select('+password');
-
-  if (!user || !(await user.correctPassword(password, user.password)))
-    return next(new AppError(401, 'Incorrect Email or Password'));
-
-  createSendToken(user, 200, req, res);
-}
-
-function logout(req, res) {
-  res.cookie('jwt', 'loggedout', {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
-  });
-
-  res.status(200).json({ status: 'success' });
-}
-
-async function protect(req, res, next) {
-  let token;
-
-  const { authorization } = req.headers;
-
-  if (authorization && authorization.startsWith('Bearer'))
-    token = authorization.split(' ')[1];
-  else if (req.cookies.jwt) token = req.cookies.jwt;
-
-  if (!token)
-    return next(
-      new AppError(401, 'You are not logged in! Please Login to get access.')
-    );
-
-  const decodedToken = await promisify(jwt.verify)(
-    token,
-    process.env.JWT_SECRET
-  );
-
-  const user = await User.findById(decodedToken.id);
-
-  if (!user)
-    return next(
-      new AppError(
-        401,
-        'The user belonging to this token does no longer exist.'
-      )
-    );
-
-  if (await user.changedPasswordAfter(decodedToken.iat)) {
-    return next(
-      new AppError(401, 'User Recently changed password! Please Login Again.')
-    );
-  }
-
-  req.user = user;
-  res.locals.user = user;
-
-  next();
-}
-
-async function isLoggedIn(req, res, next) {
-  if (req.cookies.jwt) {
-    try {
-      const decodedToken = await promisify(jwt.verify)(
-        req.cookies.jwt,
-        process.env.JWT_SECRET
-      );
-
-      const user = await User.findById(decodedToken.id);
-
-      if (!user) return next();
-
-      if (await user.changedPasswordAfter(decodedToken.iat)) {
-        return next();
-      }
-
-      res.locals.user = user;
-
-      return next();
-    } catch (err) {
-      return next();
-    }
-  }
-
-  next();
-}
-
-function restrictTo(...roles) {
-  return function(req, res, next) {
-    if (!roles.includes(req.user.role))
-      return next(
-        new AppError(403, 'You do not have permission to perform this action')
-      );
-
-    next();
-  };
-}
-
-async function forgotPassword(req, res, next) {
-  const user = await User.findOne({ email: req.body.email });
-
-  if (!user)
-    return next(new AppError(404, 'There is no user with that email address'));
-
-  const resetToken = user.createPasswordResetToken();
-  await user.save({ validateBeforeSave: false });
 
   try {
-    const resetURL = `${req.protocol}://${req.get(
-      'host'
-    )}/api/v1/users/resetPassword/${resetToken}`;
+    const savedUser = await newUser.save();
 
-    await new Email(user, resetURL).sendPasswordReset();
+    const accessToken = jwt.sign(
+      {
+        id: savedUser._id,
+      },
+      process.env.jwtSecret,
+      { expiresIn: '3d' },
+    );
 
-    res.status(200).json({
-      status: 'success',
-      message: 'Token sent to email!'
-    });
+    sendConfirmationEmail(userName, email, uniqueToken);
+    const { password, ...others } = savedUser._doc;
+    res.status(200).json({ ...others, accessToken });
+    console.log(`Successfully registered user`);
   } catch (err) {
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-
-    await user.save({ validateBeforeSave: false });
-
-    return next(
-      new AppError(
-        500,
-        'There was an error sending the email. Please Try again later.'
-      )
-    );
+    res.status(500).json(err);
+    console.log({ err });
   }
-}
+};
 
-async function resetPassword(req, res, next) {
-  const hashedToken = crypto
-    .createHash('sha256')
-    .update(req.params.token)
-    .digest('hex');
+const loginUser = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
 
-  const user = await User.findOne({
-    passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
-  });
+    if (!user) {
+      return res.status(401).json('Wrong credentials');
+    }
 
-  if (!user)
-    return next(
-      new AppError(400, 'Invalid Token or the token has been expired')
+    const hashedPassword = CryptoJS.AES.decrypt(
+      user.password,
+      process.env.PASS_SECRET,
     );
 
-  user.password = req.body.password;
-  user.passwordConfirm = req.body.passwordConfirm;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-  await user.save();
+    const passwordOriginal = hashedPassword.toString(CryptoJS.enc.Utf8);
+    if (passwordOriginal !== req.body.password) {
+      return res.status(401).json('Wrong credentials');
+    }
 
-  createSendToken(user, 200, req, res);
-}
+    const accessToken = jwt.sign(
+      {
+        id: user._id,
+      },
+      process.env.jwtSecret,
+      { expiresIn: '3d' },
+    );
 
-async function updatePassword(req, res, next) {
-  const user = await User.findById(req.user.id).select('+password');
+    const { password, ...others } = user._doc;
+    console.log(`Successfully logged in`);
+    res.status(200).json({ ...others, accessToken });
+  } catch (err) {}
+};
 
-  if (!(await user.correctPassword(req.body.passwordCurrent, user.password)))
-    return next(new AppError('Your current password is wrong.', 401));
+const verifyUser = (req, res, next) => {
+  console.log('verifying');
+  User.findOne({
+    verificationToken: req.params.verificationToken,
+  })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({ message: 'User Not found.' });
+      }
 
-  user.password = req.body.password;
-  user.passwordConfirm = req.body.passwordConfirm;
-  await user.save();
+      user.verified = true;
+      user.save(err => {
+        if (err) {
+          res.status(500).json({ message: err });
+          return;
+        } else {
+          res
+            .status(200)
+            .json({ message: 'Successfully verified', success: true });
+        }
+      });
+    })
+    .catch(e => console.log('error', e));
+};
 
-  createSendToken(user, 200, req, res);
-}
+const forgotPass = (req, res) => {
+  const { email } = req.body;
+
+  const uniqueToken = uuidv4();
+
+  User.findOne({ email }).then(result => {
+    if (!result) {
+      return res
+        .status(403)
+        .json({ message: 'No user found w.r.t given email', success: false });
+    } else {
+      console.log(result);
+      result.passwordToken = uniqueToken;
+      result.save(err => {
+        if (err) {
+          res.status(500).json({ message: err });
+          return;
+        } else {
+          res
+            .status(200)
+            .json({ message: 'Successfully saved token', success: true });
+        }
+      });
+
+      sendPassResetEmail(result.userName, email, uniqueToken);
+    }
+  });
+};
+
+const resetPass = (req, res) => {
+  const { pass, passwordToken } = req.body;
+
+  console.log('verifying token');
+  User.findOne({
+    passwordToken,
+  })
+    .then(user => {
+      if (!user) {
+        return res.status(404).json({
+          message: 'Token expired, resend password change request',
+          success: false,
+        });
+      }
+
+      user.password = CryptoJS.AES.encrypt(
+        pass,
+        process.env.PASS_SECRET,
+      ).toString();
+      user.passwordToken = null;
+      user.save(err => {
+        if (err) {
+          res.status(500).json({ message: err });
+          return;
+        } else {
+          res
+            .status(200)
+            .json({ message: 'Successfully changed password', success: true });
+        }
+      });
+    })
+    .catch(e => console.log('error', e));
+};
 
 module.exports = {
-  signup: catchAsync(signup),
-  login: catchAsync(login),
-  logout,
-  protect: catchAsync(protect),
-  restrictTo,
-  forgotPassword: catchAsync(forgotPassword),
-  resetPassword: catchAsync(resetPassword),
-  updatePassword: catchAsync(updatePassword),
-  isLoggedIn
+  registerUser,
+  loginUser,
+  verifyUser,
+  forgotPass,
+  resetPass,
 };
