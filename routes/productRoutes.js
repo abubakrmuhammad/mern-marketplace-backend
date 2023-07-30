@@ -1,51 +1,51 @@
 const express = require('express');
-const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
-const reviewRouter = require('../routes/reviewRoutes');
+// const reviewRouter = require('../routes/reviewRoutes');
+const productController = require('../controllers/productController');
 
-const router = express.Router();
+const productsRouter = express.Router();
 
-router.use('/:tourId/reviews', reviewRouter);
+// router.use('/:tourId/reviews', reviewRouter);
 
 // router.param('id', tourController.checkID);
-router.route('/tour-stats').get(tourController.getTourStats);
-router
+productsRouter.route('/tour-stats').get(productController.getTourStats);
+productsRouter
   .route('/monthly-plan/:year')
   .get(
     authController.protect,
     authController.restrictTo('admin', 'lead-guide', 'guide'),
-    tourController.getMonthlyPlan
+    productController.getMonthlyPlan
   );
 
-router
+productsRouter
   .route('/tours-within/:distance/center/:latlng/unit/:unit')
-  .get(tourController.getToursWithin);
+  .get(productController.getToursWithin);
 
-router.route('/distances/:latlng/unit/:unit').get(tourController.getDistances);
+productsRouter.route('/distances/:latlng/unit/:unit').get(productController.getDistances);
 
-router
+productsRouter
   .route('/')
-  .get(tourController.getAllTours)
+  .get(productController.getAllProducts)
   .post(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
-    tourController.createTour
+    // authController.protect,
+    // authController.restrictTo('admin', 'lead-guide'),
+    productController.createProduct
   );
 
-router
-  .route('/:id')
-  .get(tourController.getTour)
-  .patch(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
-    tourController.uploadTourImages,
-    tourController.resizeTourImages,
-    tourController.updateTour
-  )
-  .delete(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide'),
-    tourController.deleteTour
-  );
+// productsRouter
+//   .route('/:id')
+//   .get(productController.getTour)
+//   .patch(
+//     authController.protect,
+//     authController.restrictTo('admin', 'lead-guide'),
+//     productController.uploadTourImages,
+//     productController.resizeTourImages,
+//     productController.updateTour
+//   )
+//   .delete(
+//     authController.protect,
+//     authController.restrictTo('admin', 'lead-guide'),
+//     productController.deleteTour
+//   );
 
-module.exports = router;
+module.exports = productsRouter;

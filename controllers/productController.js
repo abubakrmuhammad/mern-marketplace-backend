@@ -1,9 +1,9 @@
 const multer = require('multer');
 const sharp = require('sharp');
-const Tour = require('../models/tourModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError.js');
 const factory = require('./controllerFactory');
+const Product = require('../models/productModel');
 
 const multerStorage = multer.memoryStorage();
 
@@ -13,33 +13,31 @@ const multerFilter = (req, file, cb) => {
     cb(new AppError(400, 'Not an image! Please upload only an image.'), false);
 };
 
-const uploadTourImages = multer({
+const uploadProductImages = multer({
   storage: multerStorage,
   fileFilter: multerFilter
 }).fields([
-  { name: 'imageCover', maxCount: 1 },
+  { name: 'coverImage', maxCount: 1 },
   { name: 'images', maxCount: 3 }
 ]);
 
-async function resizeTourImages(req, res, next) {
-  if (!req.files.imageCover || !req.files.images) return next();
+async function resizeProductImages(req, res, next) {
+  if (!req.files.coverImage || !req.files.images) return next();
 
-  req.body.imageCover = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+  req.body.imageCover = `product-${req.params.id}-${Date.now()}-cover.jpeg`;
 
   await sharp(req.files.imageCover[0].buffer)
-    .resize(2000, 1333)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
-    .toFile(`public/img/tours/${req.body.imageCover}`);
+    .toFile(`public/img/products/${req.body.coverImage}`);
 
   req.body.images = [];
 
   await Promise.all(
     req.files.images.map(async (file, i) => {
-      const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      const filename = `product-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
 
       await sharp(file.buffer)
-        .resize(2000, 1333)
         .toFormat('jpeg')
         .jpeg({ quality: 85 })
         .toFile(`public/img/tours/${filename}`);
@@ -52,7 +50,7 @@ async function resizeTourImages(req, res, next) {
 }
 
 async function getTourStats(req, res, next) {
-  const stats = await Tour.aggregate([
+  const stats = await Product.aggregate([
     { $match: { ratingsAverage: { $gte: 4.5 } } },
     {
       $group: {
@@ -70,10 +68,11 @@ async function getTourStats(req, res, next) {
 
   res.status(200).json({ status: 'success', data: { stats } });
 }
+
 async function getMonthlyPlan(req, res, next) {
   const year = parseInt(req.params.year, 10);
 
-  const plan = await Tour.aggregate([
+  const plan = await Product.aggregate([
     { $unwind: '$startDates' },
     {
       $match: {
@@ -113,7 +112,7 @@ async function getToursWithin(req, res, next) {
       )
     );
 
-  const tours = await Tour.find({
+  const tours = await Product.find({
     startLocation: {
       $geoWithin: { $centerSphere: [[lng, lat], radius] }
     }
@@ -142,7 +141,7 @@ async function getDistances(req, res, next) {
       )
     );
 
-  const distances = await Tour.aggregate([
+  const distances = await Product.aggregate([
     {
       $geoNear: {
         near: {
@@ -170,15 +169,15 @@ async function getDistances(req, res, next) {
 }
 
 module.exports = {
-  getAllTours: factory.getAll(Tour),
-  getTour: factory.getOne(Tour, { path: 'reviews' }),
-  createTour: factory.createOne(Tour),
-  updateTour: factory.updateOne(Tour),
-  deleteTour: factory.deleteOne(Tour),
+  getAllProducts: factory.getAll(Product),
+  getProduct: factory.getOne(Product, { path: 'reviews' }),
+  createProduct: factory.createOne(Product),
+  updateProduct: factory.updateOne(Product),
+  deleteProduct: factory.deleteOne(Product),
   getTourStats: catchAsync(getTourStats),
   getMonthlyPlan: catchAsync(getMonthlyPlan),
   getToursWithin: catchAsync(getToursWithin),
   getDistances: catchAsync(getDistances),
-  uploadTourImages,
-  resizeTourImages: catchAsync(resizeTourImages)
+  uploadTourImages: uploadProductImages,
+  resizeTourImages: catchAsync(resizeProductImages)
 };

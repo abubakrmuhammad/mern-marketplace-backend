@@ -7,6 +7,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, 'A product must have a title'],
       trim: true,
+      unique: true,
       minlength: [3, 'A product title must have at least 3 characters'],
       maxlength: [512, 'A product title can be upto 512 characters only']
     },
