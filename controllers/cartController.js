@@ -40,7 +40,7 @@ const addToCart = catchAsync(async (req, res, next) => {
   // Save the cart with updated item list
   await cart.save();
 
-  res.status(200).json({ status: 'success', data: { cart } });
+  res.status(200).json({ success: true, data: { cart } });
 });
 
 // Remove product from the cart
@@ -63,7 +63,7 @@ const removeFromCart = catchAsync(async (req, res, next) => {
   // Save the cart with updated item list
   await cart.save();
 
-  res.status(200).json({ status: 'success', data: { cart } });
+  res.status(200).json({ success: true, data: { cart } });
 });
 
 // Get the user's cart
@@ -78,7 +78,7 @@ const getCart = catchAsync(async (req, res, next) => {
     return next(new AppError(404, 'Cart not found'));
   }
 
-  res.status(200).json({ status: 'success', data: { cart } });
+  res.status(200).json({ success: true, data: { cart } });
 });
 
 module.exports = {

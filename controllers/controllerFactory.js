@@ -18,7 +18,7 @@ function getAll(Model) {
 
     // Send Response
     res.status(200).json({
-      status: 'success',
+      success: true,
       results: docs.length,
       data: { data: docs },
     });
@@ -35,7 +35,7 @@ function getOne(Model, populateOptions) {
     if (!doc) return next(new AppError(404, 'No Document found with that ID.'));
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       data: { data: doc },
     });
   });
@@ -46,7 +46,7 @@ function createOne(Model) {
     const doc = await Model.create(req.body);
 
     res.status(201).json({
-      status: 'success',
+      success: true,
       data: { data: doc },
     });
   });
@@ -61,7 +61,7 @@ function updateOne(Model) {
 
     if (!doc) return next(new AppError(404, 'No Document found with that ID.'));
 
-    res.status(200).json({ status: 'success', data: { data: doc } });
+    res.status(200).json({ success: true, data: { data: doc } });
   });
 }
 
@@ -72,7 +72,7 @@ function deleteOne(Model) {
     if (!doc) return next(new AppError(404, 'No Document found with that ID.'));
 
     res.status(204).json({
-      status: 'success',
+      success: true,
       data: null,
     });
   });

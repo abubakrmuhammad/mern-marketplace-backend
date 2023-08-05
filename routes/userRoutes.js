@@ -10,7 +10,7 @@ router.get('/logout', authController.logout);
 router.post('/forgotPassword', authController.forgotPassword);
 router.patch('/resetPassword/:token', authController.resetPassword);
 
-// router.use(authController.protect);
+router.use(authController.protect);
 
 router.patch('/updateMyPassword', authController.updatePassword);
 
@@ -20,13 +20,14 @@ router
   .patch(
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
-    userController.updateMe,
+    userController.updateMe
   )
   .delete(userController.deleteMe);
 
-// router.use(authController.restrictTo('admin'));
+router.use(authController.restrictTo('admin'));
 
 router.route('/').get(userController.getAllUsers);
+// .post(userController.createUser);
 
 router
   .route('/:id')

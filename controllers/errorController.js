@@ -33,11 +33,9 @@ function jwtTokenExpiredHandler() {
 function sendErrorDev(err, req, res) {
   const { statusCode, status, message, stack } = err;
 
-  console.log('d');
-
   if (req.originalUrl.startsWith('/api'))
     return res.status(statusCode).json({
-      status,
+      success: false,
       message,
       stack,
       error: err,
@@ -63,7 +61,7 @@ function sendErrorProd(err, req, res) {
     console.error('Error 💥', err);
 
     return res.status(500).json({
-      status: 'error',
+      success: false,
       message: 'Something went Wrong!',
     });
   }

@@ -24,7 +24,7 @@ function createSendToken(user, statusCode, req, res) {
   user.password = undefined;
 
   res.status(statusCode).json({
-    status: 'success',
+    success: true,
     token,
     data: {
       user,
@@ -71,7 +71,7 @@ function logout(req, res) {
     httpOnly: true,
   });
 
-  res.status(200).json({ status: 'success' });
+  res.status(200).json({ success: true });
 }
 
 async function protect(req, res, next) {
@@ -170,7 +170,7 @@ async function forgotPassword(req, res, next) {
     await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
-      status: 'success',
+      success: true,
       message: 'Token sent to email!',
     });
   } catch (err) {

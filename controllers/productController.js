@@ -66,7 +66,7 @@ async function getTourStats(req, res, next) {
     { $sort: { avgPrice: 1 } },
   ]);
 
-  res.status(200).json({ status: 'success', data: { stats } });
+  res.status(200).json({ success: true, data: { stats } });
 }
 
 async function getMonthlyPlan(req, res, next) {
@@ -95,7 +95,7 @@ async function getMonthlyPlan(req, res, next) {
     { $limit: 12 },
   ]);
 
-  res.status(200).json({ status: 'success', data: { plan } });
+  res.status(200).json({ success: true, data: { plan } });
 }
 
 async function getToursWithin(req, res, next) {
@@ -119,7 +119,7 @@ async function getToursWithin(req, res, next) {
   });
 
   res.status(200).json({
-    status: 'success',
+    success: true,
     results: tours.length,
     data: {
       data: tours,
@@ -161,7 +161,7 @@ async function getDistances(req, res, next) {
   ]);
 
   res.status(200).json({
-    status: 'success',
+    success: true,
     data: {
       data: distances,
     },
