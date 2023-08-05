@@ -7,7 +7,7 @@ dotenv.config({ path: '.env' });
 const port = process.env.PORT || 3000;
 
 const DB = process.env.DATABASE_URI.replace(
-  '<PASSWORD>',
+  '<password>',
   process.env.DATABASE_PASSWORD
 );
 

@@ -1,10 +1,25 @@
 const express = require('express');
-const productsRouter = require('./routes/productRoutes');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const compression = require('compression');
+const cors = require('cors');
+
 const usersRouter = require('./routes/userRoutes');
+const productsRouter = require('./routes/productRoutes');
+
+const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
-app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json({limit: '10kb'}));
+app.use(cookieParser());
+
+app.use('/api/*', cors());
+app.options('/api/*', cors());
+app.use(mongoSanitize());
+app.use(compression());
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
@@ -12,5 +27,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/users', usersRouter);
 app.use('/api/products', productsRouter)
+
+app.use(globalErrorHandler);
 
 module.exports = app;
