@@ -9,25 +9,25 @@ productsRouter
   .route('/')
   .get(productController.getAllProducts)
   .post(
-    // authController.protect,
-    // authController.restrictTo('admin', 'lead-guide'),
+    authController.protect,
+    authController.restrictTo('admin'),
     productController.createProduct
   );
 
-// productsRouter
-//   .route('/:id')
-//   .get(productController.getTour)
-//   .patch(
-//     authController.protect,
-//     authController.restrictTo('admin', 'lead-guide'),
-//     productController.uploadTourImages,
-//     productController.resizeTourImages,
-//     productController.updateTour
-//   )
-//   .delete(
-//     authController.protect,
-//     authController.restrictTo('admin', 'lead-guide'),
-//     productController.deleteTour
-//   );
+productsRouter
+  .route('/:id')
+  .get(productController.getProduct)
+  .patch(
+    authController.protect,
+    authController.restrictTo('admin'),
+    productController.uploadProductImages,
+    productController.resizeProductImages,
+    productController.updateProduct
+  )
+  .delete(
+    authController.protect,
+    authController.restrictTo('admin'),
+    productController.deleteProduct
+  );
 
 module.exports = productsRouter;

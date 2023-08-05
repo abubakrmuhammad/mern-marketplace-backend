@@ -174,10 +174,10 @@ module.exports = {
   createProduct: factory.createOne(Product),
   updateProduct: factory.updateOne(Product),
   deleteProduct: factory.deleteOne(Product),
-  getTourStats: catchAsync(getTourStats),
+  getProductStats: catchAsync(getTourStats),
   getMonthlyPlan: catchAsync(getMonthlyPlan),
   getToursWithin: catchAsync(getToursWithin),
   getDistances: catchAsync(getDistances),
-  uploadTourImages: uploadProductImages,
-  resizeTourImages: catchAsync(resizeProductImages)
+  uploadProductImages,
+  resizeProductImages: catchAsync(resizeProductImages)
 };
