@@ -59,7 +59,17 @@ async function login(req, res, next) {
 
   const user = await User.findOne({ email }).select('+password');
 
-  if (!user || !(await user.correctPassword(password, user.password)))
+
+  console.log(user);
+  console.log(user.password)
+
+  console.dir('user', user)
+
+  console.dir(password, user)
+
+  // if (!user || !(await user.correctPassword(password, user.password)))
+  //   return next(new AppError(401, 'Incorrect Email or Password'));
+  if (!user || !(password === user.password))
     return next(new AppError(401, 'Incorrect Email or Password'));
 
   createSendToken(user, 200, req, res);
