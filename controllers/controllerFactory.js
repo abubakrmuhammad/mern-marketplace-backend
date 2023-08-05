@@ -20,7 +20,7 @@ function getAll(Model) {
     res.status(200).json({
       status: 'success',
       results: docs.length,
-      data: { data: docs }
+      data: { data: docs },
     });
   });
 }
@@ -36,7 +36,7 @@ function getOne(Model, populateOptions) {
 
     res.status(200).json({
       status: 'success',
-      data: { data: doc }
+      data: { data: doc },
     });
   });
 }
@@ -47,7 +47,7 @@ function createOne(Model) {
 
     res.status(201).json({
       status: 'success',
-      data: { data: doc }
+      data: { data: doc },
     });
   });
 }
@@ -56,7 +56,7 @@ function updateOne(Model) {
   return catchAsync(async function (req, res, next) {
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
-      runValidators: true
+      runValidators: true,
     });
 
     if (!doc) return next(new AppError(404, 'No Document found with that ID.'));
@@ -73,7 +73,7 @@ function deleteOne(Model) {
 
     res.status(204).json({
       status: 'success',
-      data: null
+      data: null,
     });
   });
 }
@@ -83,5 +83,5 @@ module.exports = {
   getOne,
   createOne,
   updateOne,
-  deleteOne
+  deleteOne,
 };

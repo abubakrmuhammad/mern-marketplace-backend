@@ -11,7 +11,7 @@ productsRouter
   .post(
     authController.protect,
     authController.restrictTo('admin'),
-    productController.createProduct
+    productController.createProduct,
   );
 
 productsRouter
@@ -22,12 +22,12 @@ productsRouter
     authController.restrictTo('admin'),
     productController.uploadProductImages,
     productController.resizeProductImages,
-    productController.updateProduct
+    productController.updateProduct,
   )
   .delete(
     authController.protect,
     authController.restrictTo('admin'),
-    productController.deleteProduct
+    productController.deleteProduct,
   );
 
 module.exports = productsRouter;

@@ -12,7 +12,9 @@ const addToCart = catchAsync(async (req, res, next) => {
   const product = await Product.findById(productId);
 
   if (!product) {
-    return next(new AppError(404, 'Product You are trying to add does not exist'));
+    return next(
+      new AppError(404, 'Product You are trying to add does not exist'),
+    );
   }
 
   // Find the user's cart or create a new cart if not exists
@@ -24,7 +26,7 @@ const addToCart = catchAsync(async (req, res, next) => {
 
   // Check if the product is already in the cart
   const existingCartItem = cart.items.find(
-    (item) => item.productId.toString() === productId
+    item => item.productId.toString() === productId,
   );
 
   if (existingCartItem) {
@@ -55,7 +57,7 @@ const removeFromCart = catchAsync(async (req, res, next) => {
 
   // Remove the product from the cart
   cart.items = cart.items.filter(
-    (item) => item.productId.toString() !== productId
+    item => item.productId.toString() !== productId,
   );
 
   // Save the cart with updated item list
@@ -66,7 +68,8 @@ const removeFromCart = catchAsync(async (req, res, next) => {
 
 // Get the user's cart
 const getCart = catchAsync(async (req, res, next) => {
-  const userId = req.user._id;``
+  const userId = req.user._id;
+  ``;
 
   // Find the user's cart
   const cart = await Cart.findOne({ user: userId });

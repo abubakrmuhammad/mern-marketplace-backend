@@ -15,7 +15,7 @@ const multerFilter = (req, file, cb) => {
 
 const uploadUserPhoto = multer({
   storage: multerStorage,
-  fileFilter: multerFilter
+  fileFilter: multerFilter,
 }).single('photo');
 
 async function resizeUserPhoto(req, res, next) {
@@ -53,8 +53,8 @@ async function updateMe(req, res, next) {
     return next(
       new AppError(
         400,
-        'This route is not for password updates. Please use /updateMyPassword'
-      )
+        'This route is not for password updates. Please use /updateMyPassword',
+      ),
     );
 
   const filteredBody = filterObject(req.body, 'name', 'email');
@@ -63,14 +63,14 @@ async function updateMe(req, res, next) {
 
   const user = await User.findByIdAndUpdate(req.user.id, filteredBody, {
     new: true,
-    runValidators: true
+    runValidators: true,
   });
 
   res.status(200).json({
     status: 'success',
     data: {
-      user
-    }
+      user,
+    },
   });
 }
 
@@ -79,7 +79,7 @@ async function deleteMe(req, res, next) {
 
   res.status(204).json({
     status: 'success',
-    data: null
+    data: null,
   });
 }
 
@@ -92,5 +92,5 @@ module.exports = {
   updateMe: catchAsync(updateMe),
   deleteMe: catchAsync(deleteMe),
   uploadUserPhoto: uploadUserPhoto,
-  resizeUserPhoto: catchAsync(resizeUserPhoto)
+  resizeUserPhoto: catchAsync(resizeUserPhoto),
 };

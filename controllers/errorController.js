@@ -33,20 +33,20 @@ function jwtTokenExpiredHandler() {
 function sendErrorDev(err, req, res) {
   const { statusCode, status, message, stack } = err;
 
-  console.log('d')
+  console.log('d');
 
   if (req.originalUrl.startsWith('/api'))
     return res.status(statusCode).json({
       status,
       message,
       stack,
-      error: err
+      error: err,
     });
 
   console.error('Error 💥', err);
   return res.status(statusCode).render('error', {
     title: 'Something went wrong!',
-    message
+    message,
   });
 }
 
@@ -57,32 +57,32 @@ function sendErrorProd(err, req, res) {
     if (err.isOperational)
       return res.status(statusCode).json({
         status,
-        message
+        message,
       });
 
     console.error('Error 💥', err);
 
     return res.status(500).json({
       status: 'error',
-      message: 'Something went Wrong!'
+      message: 'Something went Wrong!',
     });
   }
 
   if (err.isOperational)
     return res.status(statusCode).render('error', {
       title: 'Something went wrong!',
-      message
+      message,
     });
 
   console.error('Error 💥', err);
 
   res.status(statusCode).render('error', {
     title: 'Something went wrong!',
-    message: 'Please try again later.'
+    message: 'Please try again later.',
   });
 }
 
-module.exports = function(err, req, res, next) {
+module.exports = function (err, req, res, next) {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'Internal Server Error';
 

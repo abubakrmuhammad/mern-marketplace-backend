@@ -26,7 +26,7 @@ const cartSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 const Cart = mongoose.model('Cart', cartSchema);

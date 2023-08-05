@@ -20,7 +20,7 @@ router
   .patch(
     userController.uploadUserPhoto,
     userController.resizeUserPhoto,
-    userController.updateMe
+    userController.updateMe,
   )
   .delete(userController.deleteMe);
 

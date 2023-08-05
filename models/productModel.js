@@ -9,37 +9,37 @@ const productSchema = new mongoose.Schema(
       trim: true,
       unique: true,
       minlength: [3, 'A product title must have at least 3 characters'],
-      maxlength: [512, 'A product title can be upto 512 characters only']
+      maxlength: [512, 'A product title can be upto 512 characters only'],
     },
     slug: String,
     price: {
       type: Number,
-      required: [true, 'A product must have a price']
+      required: [true, 'A product must have a price'],
     },
     category: {
       type: String,
-      required: [true, 'A product must have a category']
+      required: [true, 'A product must have a category'],
     },
     description: {
       type: String,
-      trim: true
+      trim: true,
     },
     imageCover: {
       type: String,
-      required: [true, 'A product must have a cover image']
+      required: [true, 'A product must have a cover image'],
     },
     images: [String],
     createdAt: {
       type: Date,
       default: Date.now(),
-      select: false
+      select: false,
     },
-    seller: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+    seller: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   {
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-  }
+    toObject: { virtuals: true },
+  },
 );
 
 productSchema.index({ price: 1 });

@@ -15,10 +15,10 @@ const multerFilter = (req, file, cb) => {
 
 const uploadProductImages = multer({
   storage: multerStorage,
-  fileFilter: multerFilter
+  fileFilter: multerFilter,
 }).fields([
   { name: 'coverImage', maxCount: 1 },
-  { name: 'images', maxCount: 3 }
+  { name: 'images', maxCount: 3 },
 ]);
 
 async function resizeProductImages(req, res, next) {
@@ -43,7 +43,7 @@ async function resizeProductImages(req, res, next) {
         .toFile(`public/img/tours/${filename}`);
 
       req.body.images.push(filename);
-    })
+    }),
   );
 
   next();
@@ -60,10 +60,10 @@ async function getTourStats(req, res, next) {
         avgRating: { $avg: '$ratingsAverage' },
         avgPrice: { $avg: '$price' },
         minPrice: { $min: '$price' },
-        maxPrice: { $max: '$price' }
-      }
+        maxPrice: { $max: '$price' },
+      },
     },
-    { $sort: { avgPrice: 1 } }
+    { $sort: { avgPrice: 1 } },
   ]);
 
   res.status(200).json({ status: 'success', data: { stats } });
@@ -78,21 +78,21 @@ async function getMonthlyPlan(req, res, next) {
       $match: {
         startDates: {
           $gte: new Date(`${year}-01-01`),
-          $lte: new Date(`${year}-12-31`)
-        }
-      }
+          $lte: new Date(`${year}-12-31`),
+        },
+      },
     },
     {
       $group: {
         _id: { $month: '$startDates' },
         numTourStarts: { $sum: 1 },
-        tours: { $push: '$name' }
-      }
+        tours: { $push: '$name' },
+      },
     },
     { $addFields: { month: '$_id' } },
     { $project: { _id: 0 } },
     { $sort: { numTourStarts: -1 } },
-    { $limit: 12 }
+    { $limit: 12 },
   ]);
 
   res.status(200).json({ status: 'success', data: { plan } });
@@ -108,22 +108,22 @@ async function getToursWithin(req, res, next) {
     return next(
       new AppError(
         400,
-        'Please provide latitude and longitude in the format lat,lng'
-      )
+        'Please provide latitude and longitude in the format lat,lng',
+      ),
     );
 
   const tours = await Product.find({
     startLocation: {
-      $geoWithin: { $centerSphere: [[lng, lat], radius] }
-    }
+      $geoWithin: { $centerSphere: [[lng, lat], radius] },
+    },
   });
 
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: {
-      data: tours
-    }
+      data: tours,
+    },
   });
 }
 
@@ -137,8 +137,8 @@ async function getDistances(req, res, next) {
     return next(
       new AppError(
         400,
-        'Please provide latitude and longitude in the format lat,lng'
-      )
+        'Please provide latitude and longitude in the format lat,lng',
+      ),
     );
 
   const distances = await Product.aggregate([
@@ -146,25 +146,25 @@ async function getDistances(req, res, next) {
       $geoNear: {
         near: {
           type: 'Point',
-          coordinates: [lng * 1, lat * 1]
+          coordinates: [lng * 1, lat * 1],
         },
         distanceField: 'distance',
-        distanceMultiplier: multiplier
-      }
+        distanceMultiplier: multiplier,
+      },
     },
     {
       $project: {
         distance: 1,
-        name: 1
-      }
-    }
+        name: 1,
+      },
+    },
   ]);
 
   res.status(200).json({
     status: 'success',
     data: {
-      data: distances
-    }
+      data: distances,
+    },
   });
 }
 
@@ -179,5 +179,5 @@ module.exports = {
   getToursWithin: catchAsync(getToursWithin),
   getDistances: catchAsync(getDistances),
   uploadProductImages,
-  resizeProductImages: catchAsync(resizeProductImages)
+  resizeProductImages: catchAsync(resizeProductImages),
 };

@@ -8,7 +8,7 @@ const AppError = require('../utils/appError');
 
 function signToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+    expiresIn: process.env.JWT_EXPIRES_IN,
   });
 }
 
@@ -16,11 +16,9 @@ function createSendToken(user, statusCode, req, res) {
   const token = signToken(user.id);
 
   res.cookie('jwt', token, {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 1000
-    ),
+    expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 1000),
     httpOnly: true,
-    secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
+    secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
   });
 
   user.password = undefined;
@@ -29,8 +27,8 @@ function createSendToken(user, statusCode, req, res) {
     status: 'success',
     token,
     data: {
-      user
-    }
+      user,
+    },
   });
 }
 
@@ -42,7 +40,7 @@ async function signup(req, res, next) {
     email,
     password,
     passwordConfirm,
-    role
+    role,
   });
 
   const url = `${req.protocol}://${req.get('host')}/me`;
@@ -70,7 +68,7 @@ async function login(req, res, next) {
 function logout(req, res) {
   res.cookie('jwt', 'loggedout', {
     expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true
+    httpOnly: true,
   });
 
   res.status(200).json({ status: 'success' });
@@ -87,12 +85,12 @@ async function protect(req, res, next) {
 
   if (!token)
     return next(
-      new AppError(401, 'You are not logged in! Please Login to get access.')
+      new AppError(401, 'You are not logged in! Please Login to get access.'),
     );
 
   const decodedToken = await promisify(jwt.verify)(
     token,
-    process.env.JWT_SECRET
+    process.env.JWT_SECRET,
   );
 
   const user = await User.findById(decodedToken.id);
@@ -101,13 +99,13 @@ async function protect(req, res, next) {
     return next(
       new AppError(
         401,
-        'The user belonging to this token does no longer exist.'
-      )
+        'The user belonging to this token does no longer exist.',
+      ),
     );
 
   if (await user.changedPasswordAfter(decodedToken.iat)) {
     return next(
-      new AppError(401, 'User Recently changed password! Please Login Again.')
+      new AppError(401, 'User Recently changed password! Please Login Again.'),
     );
   }
 
@@ -122,7 +120,7 @@ async function isLoggedIn(req, res, next) {
     try {
       const decodedToken = await promisify(jwt.verify)(
         req.cookies.jwt,
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
       );
 
       const user = await User.findById(decodedToken.id);
@@ -145,10 +143,10 @@ async function isLoggedIn(req, res, next) {
 }
 
 function restrictTo(...roles) {
-  return function(req, res, next) {
+  return function (req, res, next) {
     if (!roles.includes(req.user.role))
       return next(
-        new AppError(403, 'You do not have permission to perform this action')
+        new AppError(403, 'You do not have permission to perform this action'),
       );
 
     next();
@@ -166,14 +164,14 @@ async function forgotPassword(req, res, next) {
 
   try {
     const resetURL = `${req.protocol}://${req.get(
-      'host'
+      'host',
     )}/api/v1/users/resetPassword/${resetToken}`;
 
     await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',
-      message: 'Token sent to email!'
+      message: 'Token sent to email!',
     });
   } catch (err) {
     user.passwordResetToken = undefined;
@@ -184,8 +182,8 @@ async function forgotPassword(req, res, next) {
     return next(
       new AppError(
         500,
-        'There was an error sending the email. Please Try again later.'
-      )
+        'There was an error sending the email. Please Try again later.',
+      ),
     );
   }
 }
@@ -198,12 +196,12 @@ async function resetPassword(req, res, next) {
 
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }
+    passwordResetExpires: { $gt: Date.now() },
   });
 
   if (!user)
     return next(
-      new AppError(400, 'Invalid Token or the token has been expired')
+      new AppError(400, 'Invalid Token or the token has been expired'),
     );
 
   user.password = req.body.password;
@@ -237,5 +235,5 @@ module.exports = {
   forgotPassword: catchAsync(forgotPassword),
   resetPassword: catchAsync(resetPassword),
   updatePassword: catchAsync(updatePassword),
-  isLoggedIn
+  isLoggedIn,
 };

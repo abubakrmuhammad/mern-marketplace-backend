@@ -7,13 +7,14 @@ const cors = require('cors');
 
 const usersRouter = require('./routes/userRoutes');
 const productsRouter = require('./routes/productRoutes');
+const cartRouter = require('./routes/cartRoutes');
 
 const globalErrorHandler = require('./controllers/errorController');
 
 const app = express();
 
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.json({limit: '10kb'}));
+app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 
 app.use('/api/*', cors());
@@ -26,7 +27,8 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/users', usersRouter);
-app.use('/api/products', productsRouter)
+app.use('/api/products', productsRouter);
+app.use('/api/cart', cartRouter);
 
 app.use(globalErrorHandler);
 
