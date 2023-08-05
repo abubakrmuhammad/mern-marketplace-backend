@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const Email = require('../utils/email');
+// const Email = require('../utils/email');
 
 function signToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -17,7 +17,7 @@ function createSendToken(user, statusCode, req, res) {
 
   res.cookie('jwt', token, {
     expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 1000
     ),
     httpOnly: true,
     secure: req.secure || req.headers['x-forwarded-proto'] === 'https'
@@ -46,7 +46,7 @@ async function signup(req, res, next) {
   });
 
   const url = `${req.protocol}://${req.get('host')}/me`;
-  await new Email(user, url).sendWelcome();
+  // await new Email(user, url).sendWelcome();
 
   createSendToken(user, 201, req, res);
 }

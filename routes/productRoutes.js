@@ -5,24 +5,6 @@ const productController = require('../controllers/productController');
 
 const productsRouter = express.Router();
 
-// router.use('/:tourId/reviews', reviewRouter);
-
-// router.param('id', tourController.checkID);
-productsRouter.route('/tour-stats').get(productController.getTourStats);
-productsRouter
-  .route('/monthly-plan/:year')
-  .get(
-    authController.protect,
-    authController.restrictTo('admin', 'lead-guide', 'guide'),
-    productController.getMonthlyPlan
-  );
-
-productsRouter
-  .route('/tours-within/:distance/center/:latlng/unit/:unit')
-  .get(productController.getToursWithin);
-
-productsRouter.route('/distances/:latlng/unit/:unit').get(productController.getDistances);
-
 productsRouter
   .route('/')
   .get(productController.getAllProducts)
