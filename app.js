@@ -7,6 +7,7 @@ const cors = require('cors');
 
 const usersRouter = require('./routes/userRoutes');
 const productsRouter = require('./routes/productRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 const cartRouter = require('./routes/cartRoutes');
 
 const globalErrorHandler = require('./controllers/errorController');
@@ -28,6 +29,7 @@ app.get('/', (req, res) => {
 
 app.use('/api/users', usersRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/categories', categoryRouter);
 app.use('/api/cart', cartRouter);
 
 app.use(globalErrorHandler);

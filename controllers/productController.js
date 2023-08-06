@@ -4,6 +4,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError.js');
 const factory = require('./controllerFactory');
 const Product = require('../models/productModel');
+const slugify = require('slugify');
 
 const multerStorage = multer.memoryStorage();
 
@@ -24,23 +25,27 @@ const uploadProductImages = multer({
 async function resizeProductImages(req, res, next) {
   if (!req.files.coverImage || !req.files.images) return next();
 
-  req.body.imageCover = `product-${req.params.id}-${Date.now()}-cover.jpeg`;
+  console.log('hello?')
 
-  await sharp(req.files.imageCover[0].buffer)
+  const slug = slugify(req.body.title, { lower: true });
+
+  req.body.imageCover = `product-${slug}-cover.jpeg`;
+
+  await sharp(req.files.coverImage[0].buffer)
     .toFormat('jpeg')
     .jpeg({ quality: 90 })
-    .toFile(`public/img/products/${req.body.coverImage}`);
+    .toFile(`public/img/products/${req.body.imageCover}`);
 
   req.body.images = [];
 
   await Promise.all(
     req.files.images.map(async (file, i) => {
-      const filename = `product-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      const filename = `product-${slug}-${i + 1}.jpeg`;
 
       await sharp(file.buffer)
         .toFormat('jpeg')
         .jpeg({ quality: 85 })
-        .toFile(`public/img/tours/${filename}`);
+        .toFile(`public/img/products/${filename}`);
 
       req.body.images.push(filename);
     }),
@@ -170,7 +175,7 @@ async function getDistances(req, res, next) {
 
 module.exports = {
   getAllProducts: factory.getAll(Product),
-  getProduct: factory.getOne(Product, { path: 'reviews' }),
+  getProduct: factory.getOne(Product),
   createProduct: factory.createOne(Product),
   updateProduct: factory.updateOne(Product),
   deleteProduct: factory.deleteOne(Product),

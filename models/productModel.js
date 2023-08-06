@@ -17,8 +17,9 @@ const productSchema = new mongoose.Schema(
       required: [true, 'A product must have a price'],
     },
     category: {
-      type: String,
-      required: [true, 'A product must have a category'],
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
     },
     description: {
       type: String,
@@ -34,7 +35,7 @@ const productSchema = new mongoose.Schema(
       default: Date.now(),
       select: false,
     },
-    seller: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   },
   {
     toJSON: { virtuals: true },
@@ -45,8 +46,21 @@ const productSchema = new mongoose.Schema(
 productSchema.index({ price: 1 });
 productSchema.index({ slug: 1 });
 
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'category',
+    select: 'name',
+  }).populate({
+    path: 'seller',
+    select: 'name',
+  });
+
+  next();
+});
+
+
 productSchema.pre('save', function (next) {
-  this.slug = slugify(this.name, { lower: true });
+  this.slug = slugify(this.title, { lower: true });
 
   next();
 });

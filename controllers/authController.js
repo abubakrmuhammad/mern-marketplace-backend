@@ -8,7 +8,7 @@ const AppError = require('../utils/appError');
 
 function signToken(id) {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+    expiresIn: process.env.JWT_EXPIRES_IN * 1000,
   });
 }
 
@@ -34,6 +34,8 @@ function createSendToken(user, statusCode, req, res) {
 
 async function signup(req, res, next) {
   const { name, email, password, passwordConfirm, role } = req.body;
+
+  if (password !== passwordConfirm) return next(new AppError(400, 'Passwords do not match'));
 
   const user = await User.create({
     name,

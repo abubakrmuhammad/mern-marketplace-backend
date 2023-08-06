@@ -26,17 +26,6 @@ const userSchema = new mongoose.Schema({
     minlength: 8,
     select: false,
   },
-  passwordConfirm: {
-    type: String,
-    required: [true, 'Please confirm your password'],
-    validate: {
-      validator: function (value) {
-        // ONLY WORKS ON CREATE AND SAVE
-        return value === this.password;
-      },
-      message: 'Passwords are not the same',
-    },
-  },
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
@@ -51,13 +40,6 @@ userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
   next();
 });
-
-userSchema.methods.correctPassword = async function (
-  candidatePassword,
-  userPassword,
-) {
-  return await bcrypt.compare(candidatePassword, userPassword);
-};
 
 userSchema.methods.changedPasswordAfter = async function (jwtTimestamp) {
   if (this.passwordChangedAt) {
