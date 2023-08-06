@@ -11,12 +11,15 @@ const DB = process.env.DATABASE_URI.replace(
   process.env.DATABASE_PASSWORD,
 );
 
-mongoose.connect(DB).then(() => {
-  console.log('Connected to DB. 🚀');
+mongoose
+  .connect(DB)
+  .then(() => {
+    console.log('Connected to DB. 🚀');
 
-  app.listen(port, () => {
-    console.log(`App listening on port ${port}. 🤞`);
+    app.listen(port, () => {
+      console.log(`App listening on port ${port}. 🤞`);
+    });
+  })
+  .catch(err => {
+    console.error('Error connecting to DB. 💥', err);
   });
-}).catch((err) => {
-  console.error('Error connecting to DB. 💥', err);
-});

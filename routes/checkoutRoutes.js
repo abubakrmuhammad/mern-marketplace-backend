@@ -6,11 +6,13 @@ const checkoutRouter = express.Router();
 
 checkoutRouter.use(authController.protect);
 
-checkoutRouter.route('/')
+checkoutRouter
+  .route('/')
   .get(authController.restrictTo('admin'), checkoutController.getAllCheckouts)
   .post(checkoutController.createCheckout);
 
-checkoutRouter.route('/:id')
+checkoutRouter
+  .route('/:id')
   .get(checkoutController.getCheckout)
   .delete(checkoutController.deleteCheckout);
 

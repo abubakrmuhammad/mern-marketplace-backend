@@ -35,7 +35,8 @@ function createSendToken(user, statusCode, req, res) {
 async function signup(req, res, next) {
   const { name, email, password, passwordConfirm, role } = req.body;
 
-  if (password !== passwordConfirm) return next(new AppError(400, 'Passwords do not match'));
+  if (password !== passwordConfirm)
+    return next(new AppError(400, 'Passwords do not match'));
 
   const user = await User.create({
     name,

@@ -25,8 +25,6 @@ const uploadProductImages = multer({
 async function resizeProductImages(req, res, next) {
   if (!req.files.coverImage || !req.files.images) return next();
 
-  console.log('hello?')
-
   const slug = slugify(req.body.title, { lower: true });
 
   req.body.imageCover = `product-${slug}-cover.jpeg`;

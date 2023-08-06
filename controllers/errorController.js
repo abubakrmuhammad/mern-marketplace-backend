@@ -37,7 +37,7 @@ function sendErrorDev(err, req, res) {
     return res.status(statusCode).json({
       success: false,
       message,
-      stack,
+      // stack,
       error: err,
     });
 

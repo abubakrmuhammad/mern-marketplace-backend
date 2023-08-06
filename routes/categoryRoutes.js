@@ -4,7 +4,6 @@ const categoryController = require('../controllers/categoryController');
 
 const categoryRouter = express.Router();
 
-// Protect all routes after this middleware
 categoryRouter.use(authController.protect);
 
 categoryRouter

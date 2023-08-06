@@ -43,7 +43,7 @@ const checkoutSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
-  }
+  },
 );
 
 checkoutSchema.pre(/^find/, function (next) {
@@ -80,7 +80,6 @@ checkoutSchema.pre(/^find/, function (next) {
   });
 
   next();
-
 });
 
 checkoutSchema.pre('save', function (next) {

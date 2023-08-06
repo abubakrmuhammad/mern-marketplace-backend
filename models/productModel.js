@@ -58,7 +58,6 @@ productSchema.pre(/^find/, function (next) {
   next();
 });
 
-
 productSchema.pre('save', function (next) {
   this.slug = slugify(this.title, { lower: true });
 

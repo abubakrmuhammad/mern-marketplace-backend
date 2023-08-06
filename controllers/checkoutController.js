@@ -3,8 +3,6 @@ const AppError = require('../utils/appError');
 const Checkout = require('../models/checkoutModel');
 const controllerFactory = require('./controllerFactory');
 
-
-
 const createCheckout = catchAsync(async (req, res, next) => {
   const { products, totalAmount } = req.body;
   const userId = req.user._id;
