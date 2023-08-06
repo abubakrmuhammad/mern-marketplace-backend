@@ -7,7 +7,6 @@ const createCheckout = catchAsync(async (req, res, next) => {
   const { products, totalAmount } = req.body;
   const userId = req.user._id;
 
-  // Create the fake checkout
   const checkout = await Checkout.create({
     user: userId,
     products,
@@ -15,16 +14,28 @@ const createCheckout = catchAsync(async (req, res, next) => {
   });
 
   res.status(201).json({
-    status: 'success',
+    success: true,
     data: {
       checkout,
     },
   });
 });
 
+async function getCheckoutsByUser(req, res, next) {
+  const checkouts = await Checkout.find({ user: req.params.id });
+
+  res.status(200).json({
+    success: true,
+    data: {
+      checkouts,
+    },
+  });
+}
+
 module.exports = {
   getAllCheckouts: controllerFactory.getAll(Checkout),
   getCheckout: controllerFactory.getOne(Checkout),
   deleteCheckout: controllerFactory.deleteOne(Checkout),
   createCheckout,
+  getCheckoutsByUser: catchAsync(getCheckoutsByUser),
 };

@@ -1,6 +1,8 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
+const productController = require('../controllers/productController');
+const checkoutController = require('../controllers/checkoutController');
 
 const router = express.Router();
 
@@ -26,5 +28,13 @@ router
   .get(userController.getUser)
   // .patch(userController.updateUser)
   .delete(userController.deleteUser);
+
+router
+  .route('/:id/products')
+  .get(authController.protect, productController.getProductsByUser);
+
+router
+  .route('/:id/checkouts')
+  .get(authController.protect, checkoutController.getCheckoutsByUser);
 
 module.exports = router;
