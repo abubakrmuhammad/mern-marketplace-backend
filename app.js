@@ -11,6 +11,7 @@ const categoryRouter = require('./routes/categoryRoutes');
 const cartRouter = require('./routes/cartRoutes');
 
 const globalErrorHandler = require('./controllers/errorController');
+const checkoutRouter = require('./routes/checkoutRoutes');
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use('/api/users', usersRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/categories', categoryRouter);
 app.use('/api/cart', cartRouter);
+app.use('/api/checkouts', checkoutRouter);
 
 app.use(globalErrorHandler);
 
