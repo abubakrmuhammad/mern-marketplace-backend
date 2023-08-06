@@ -57,9 +57,23 @@ async function getProductsByUser(req, res, next) {
 
   res.status(200).json({
     success: true,
-    data: {
-      products,
-    },
+    data: products,
+  });
+}
+
+async function deleteMyProduct(req, res, next) {
+  const product = await Product.findById(req.params.productId);
+
+  if (!product) return next(new AppError(404, 'No product found with that ID'));
+
+  if (product.seller._id.toString() !== req.user._id.toString())
+    return next(new AppError(401, 'You are not authorized to delete this'));
+
+  await Product.findByIdAndDelete(req.params.productId);
+
+  res.status(204).json({
+    success: true,
+    data: null,
   });
 }
 
@@ -72,4 +86,5 @@ module.exports = {
   getProductsByUser: catchAsync(getProductsByUser),
   uploadProductImages: catchAsync(uploadProductImages),
   resizeProductImages: catchAsync(resizeProductImages),
+  deleteMyProduct: catchAsync(deleteMyProduct),
 };

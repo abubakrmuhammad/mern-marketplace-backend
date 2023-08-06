@@ -26,9 +26,7 @@ async function getCheckoutsByUser(req, res, next) {
 
   res.status(200).json({
     success: true,
-    data: {
-      checkouts,
-    },
+    data: checkouts,
   });
 }
 
