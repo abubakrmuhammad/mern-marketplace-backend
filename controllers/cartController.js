@@ -79,8 +79,26 @@ const getCart = catchAsync(async (req, res, next) => {
   res.status(200).json({ success: true, data: { cart } });
 });
 
+const clearCart = catchAsync(async (req, res, next) => {
+  const userId = req.user._id;
+
+  // Find the user's cart
+  const cart = await Cart.findOne({ user: userId });
+
+  if (!cart) return next(new AppError(404, 'Cart not found'));
+
+  // Clear the cart
+  cart.items = [];
+
+  // Save the cart with updated item list
+  await cart.save();
+
+  res.status(200).json({ success: true, data: { cart } });
+});
+
 module.exports = {
   addToCart,
   removeFromCart,
   getCart,
+  clearCart,
 };

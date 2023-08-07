@@ -12,4 +12,6 @@ cartRouter
   .post(cartController.addToCart)
   .delete(cartController.removeFromCart);
 
+cartRouter.route('/clear').delete(cartController.clearCart);
+
 module.exports = cartRouter;

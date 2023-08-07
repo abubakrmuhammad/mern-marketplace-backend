@@ -22,7 +22,9 @@ const createCheckout = catchAsync(async (req, res, next) => {
 });
 
 async function getCheckoutsByUser(req, res, next) {
-  const checkouts = await Checkout.find({ user: req.params.id });
+  const checkouts = await Checkout.find({ user: req.params.id }).sort({
+    createdAt: 1,
+  });
 
   res.status(200).json({
     success: true,

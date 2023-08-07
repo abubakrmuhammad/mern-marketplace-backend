@@ -9,7 +9,7 @@ const checkoutSchema = new mongoose.Schema(
     },
     products: [
       {
-        productId: {
+        product: {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'Product',
           required: true,
@@ -35,20 +35,17 @@ const checkoutSchema = new mongoose.Schema(
       enum: ['pending', 'completed', 'cancelled'],
       default: 'pending',
     },
-    createdAt: {
-      type: Date,
-      default: Date.now(),
-    },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   },
 );
 
 checkoutSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'products.productId',
+    path: 'products.product',
     select: 'title imageCover',
   });
 
@@ -66,7 +63,7 @@ checkoutSchema.pre(/^find/, function (next) {
 
 checkoutSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'products.productId.seller',
+    path: 'products.product.seller',
     select: 'name email',
   });
 
@@ -75,7 +72,7 @@ checkoutSchema.pre(/^find/, function (next) {
 
 checkoutSchema.pre(/^find/, function (next) {
   this.populate({
-    path: 'products.productId.category',
+    path: 'products.product.category',
     select: 'name',
   });
 
