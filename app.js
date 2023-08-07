@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
+const morgan = require('morgan');
 
 const usersRouter = require('./routes/userRoutes');
 const productsRouter = require('./routes/productRoutes');
@@ -18,6 +19,8 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
+
+app.use(morgan('dev'));
 
 app.use('/api/*', cors());
 app.options('/api/*', cors());

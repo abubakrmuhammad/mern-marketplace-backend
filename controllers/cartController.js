@@ -26,7 +26,7 @@ const addToCart = catchAsync(async (req, res, next) => {
 
   // Check if the product is already in the cart
   const existingCartItem = cart.items.find(
-    item => item.productId.toString() === productId,
+    item => item.product._id.toString() === productId,
   );
 
   if (existingCartItem) {
@@ -34,7 +34,7 @@ const addToCart = catchAsync(async (req, res, next) => {
     existingCartItem.quantity += quantity;
   } else {
     // If the product does not exist, add it to the cart
-    cart.items.push({ productId, quantity });
+    cart.items.push({ product, quantity });
   }
 
   // Save the cart with updated item list
@@ -57,7 +57,7 @@ const removeFromCart = catchAsync(async (req, res, next) => {
 
   // Remove the product from the cart
   cart.items = cart.items.filter(
-    item => item.productId.toString() !== productId,
+    item => item.product._id.toString() !== productId,
   );
 
   // Save the cart with updated item list
@@ -69,14 +69,12 @@ const removeFromCart = catchAsync(async (req, res, next) => {
 // Get the user's cart
 const getCart = catchAsync(async (req, res, next) => {
   const userId = req.user._id;
-  ``;
 
   // Find the user's cart
   const cart = await Cart.findOne({ user: userId });
 
-  if (!cart) {
-    return next(new AppError(404, 'Cart not found'));
-  }
+  if (!cart)
+    return res.status(200).json({ success: true, data: { cart: null } });
 
   res.status(200).json({ success: true, data: { cart } });
 });

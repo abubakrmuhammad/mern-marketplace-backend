@@ -74,7 +74,6 @@ async function getProductBySlugOrId(req, res, next) {
   });
 }
 
-
 async function getProductsByUser(req, res, next) {
   const products = await Product.find({ seller: req.params.id });
 
@@ -107,7 +106,7 @@ module.exports = {
   updateProduct: factory.updateOne(Product),
   deleteProduct: factory.deleteOne(Product),
   getProductsByUser: catchAsync(getProductsByUser),
-  uploadProductImages: catchAsync(uploadProductImages),
+  uploadProductImages: uploadProductImages,
   resizeProductImages: catchAsync(resizeProductImages),
   deleteMyProduct: catchAsync(deleteMyProduct),
 };

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema({
-  productId: {
+  product: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Product',
     required: true,
@@ -28,6 +28,15 @@ const cartSchema = new mongoose.Schema(
     toObject: { virtuals: true },
   },
 );
+
+cartSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'items.product',
+    select: 'title price imageCover slug',
+  });
+
+  next();
+});
 
 const Cart = mongoose.model('Cart', cartSchema);
 

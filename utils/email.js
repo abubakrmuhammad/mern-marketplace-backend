@@ -26,27 +26,24 @@ class Email {
       port: process.env.EMAIL_PORT,
       auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD
-      }
+        pass: process.env.EMAIL_PASSWORD,
+      },
     });
   }
 
   async send(template, subject) {
-    const html = pug.renderFile(
-      `${__dirname}/emails/${template}.pug`,
-      {
-        firstName: this.firstName,
-        url: this.url,
-        subject
-      }
-    );
+    const html = pug.renderFile(`${__dirname}/emails/${template}.pug`, {
+      firstName: this.firstName,
+      url: this.url,
+      subject,
+    });
 
     const mailOptions = {
       from: this.from,
       to: this.to,
       subject,
       html,
-      text: htmlToText(html)
+      text: htmlToText(html),
     };
 
     await this.createTransport().sendMail(mailOptions);
@@ -59,7 +56,7 @@ class Email {
   async sendPasswordReset() {
     await this.send(
       'passwordReset',
-      'Your password reset token (valid for only 10 minutes)'
+      'Your password reset token (valid for only 10 minutes)',
     );
   }
 }
