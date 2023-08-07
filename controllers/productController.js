@@ -5,6 +5,7 @@ const AppError = require('../utils/appError.js');
 const factory = require('./controllerFactory');
 const Product = require('../models/productModel');
 const slugify = require('slugify');
+const { isValidObjectId } = require('mongoose');
 
 const multerStorage = multer.memoryStorage();
 
@@ -52,6 +53,28 @@ async function resizeProductImages(req, res, next) {
   next();
 }
 
+async function getProductBySlugOrId(req, res, next) {
+  const { id } = req.params;
+
+  const isObjectId = isValidObjectId(id);
+
+  let product;
+
+  if (isObjectId) {
+    product = await Product.findById(id);
+  } else {
+    product = await Product.findOne({ slug: id });
+  }
+
+  if (!product) return next(new AppError(404, 'No product found'));
+
+  res.status(200).json({
+    success: true,
+    data: product,
+  });
+}
+
+
 async function getProductsByUser(req, res, next) {
   const products = await Product.find({ seller: req.params.id });
 
@@ -79,7 +102,7 @@ async function deleteMyProduct(req, res, next) {
 
 module.exports = {
   getAllProducts: factory.getAll(Product),
-  getProduct: factory.getOne(Product),
+  getProduct: catchAsync(getProductBySlugOrId),
   createProduct: factory.createOne(Product),
   updateProduct: factory.updateOne(Product),
   deleteProduct: factory.deleteOne(Product),
