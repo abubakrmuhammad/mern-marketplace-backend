@@ -87,6 +87,7 @@ module.exports = {
   getAllUsers: factory.getAll(User),
   getUser: factory.getOne(User),
   updateUser: factory.updateOne(User),
+  createUser: factory.createOne(User),
   deleteUser: factory.deleteOne(User),
   getMe,
   updateMe: catchAsync(updateMe),

@@ -26,8 +26,8 @@ router.route('/:id/checkouts').get(checkoutController.getCheckoutsByUser);
 
 router.use(authController.restrictTo('admin'));
 
-router.route('/').get(userController.getAllUsers);
-// .post(userController.createUser);
+router.route('/').get(userController.getAllUsers)
+  .post(userController.createUser);
 
 router
   .route('/:id')
